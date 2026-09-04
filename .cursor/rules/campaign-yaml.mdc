@@ -1,0 +1,15 @@
+---
+description: Campaign YAML contract for questshift-campaigns
+globs: "**/*.{yaml,yml}"
+alwaysApply: false
+---
+
+# Campaign YAML
+
+- Keep `metadata.id: devops-dungeon` and five `order`ed rooms. Seats stay cosmetic.
+- Every room: `puzzle_type`, `expected_command_pattern`, `accepted_examples`, `forbidden_patterns` (when there is a cursed form), `hint`, `narrative`, `success_narrative`, `canvas_event`.
+- Win conditions live in regex + examples, never only in `game_master.system_prompt`.
+- Boss `requires_loot`: `rune-thorn`, `rune-ash`, `rune-oak`, `rune-iron`.
+- `puzzle_type` is `linux` | `ansible` | `openshift` | `java` only.
+- After edits, sync engine classpath copy and gitops ConfigMap; restart the engine (no reload route).
+- Never put Hugging Face tokens, kubeconfigs, or API keys in YAML.

@@ -1,0 +1,19 @@
+---
+description: QuestShift always-on map for the campaigns repo
+alwaysApply: true
+---
+
+# QuestShift (campaigns)
+
+Read this repo's `AGENTS.md`, then campaign authoring.
+
+- Local AGENTS: `/Users/dtorresf/Documents/GitHub/na-fsi-services/questshift/questshift-campaigns/AGENTS.md`
+  GitHub: https://github.com/NA-FSI-Services/questshift-campaigns/blob/main/AGENTS.md
+- Docs AGENTS: https://github.com/NA-FSI-Services/questshift/blob/main/AGENTS.md
+  Local: `/Users/dtorresf/Documents/GitHub/na-fsi-services/questshift/questshift/AGENTS.md`
+- Authoring: https://github.com/NA-FSI-Services/questshift/blob/main/docs/CAMPAIGN-AUTHORING.md
+  Local: `/Users/dtorresf/Documents/GitHub/na-fsi-services/questshift/questshift/docs/CAMPAIGN-AUTHORING.md`
+- Adventure: https://github.com/NA-FSI-Services/questshift-campaigns/blob/main/campaigns/campaign-devops-dungeon.yaml
+  Local: `/Users/dtorresf/Documents/GitHub/na-fsi-services/questshift/questshift-campaigns/campaigns/campaign-devops-dungeon.yaml`
+
+YAML is puzzle source of truth. LLM narrates only. Do not hide win conditions only in prompts. One 60-minute campaign, cosmetic seats.
