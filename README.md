@@ -33,4 +33,4 @@ python3 -m pip install -r requirements-dev.txt
 ./verify.sh              # yamllint, ruff, pytest-cov ≥ 80% on tools/
 ```
 
-Pre-commit (once per clone): `./.githooks/install`. PRs to `main` run **Quality** / **Lint, ruff, coverage**.
+Pre-commit (once per clone): `./.githooks/install`. PRs to `main` run **Quality** / **Lint, ruff, coverage**. Dependabot opens weekly GitHub Actions update PRs.
