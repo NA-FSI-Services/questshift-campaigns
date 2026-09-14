@@ -1,0 +1,1 @@
+"""Campaign validation helpers."""

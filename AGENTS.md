@@ -25,3 +25,4 @@ YAML is the puzzle source of truth. v1 ships **one** campaign (`devops-dungeon`)
 - Keep engine classpath copy and gitops ConfigMap copy in sync when you edit.
 - Engine restart required after YAML changes (no reload endpoint).
 - Do not paste Hugging Face tokens, kubeconfigs, or API keys into campaign YAML.
+- Quality: `./verify.sh` (yamllint, ruff, pytest-cov ≥ 80% on `tools/`). Pre-commit: `./.githooks/install`. CI: `.github/workflows/quality.yml`.

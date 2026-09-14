@@ -12,4 +12,4 @@ alwaysApply: false
 - Boss `requires_loot`: `rune-thorn`, `rune-ash`, `rune-oak`, `rune-iron`.
 - `puzzle_type` is `linux` | `ansible` | `openshift` | `java` only.
 - After edits, sync engine classpath copy and gitops ConfigMap; restart the engine (no reload route).
-- Never put Hugging Face tokens, kubeconfigs, or API keys in YAML.
+- Quality: `./verify.sh` (yamllint, ruff, pytest-cov). Never put Hugging Face tokens, kubeconfigs, or API keys in YAML.

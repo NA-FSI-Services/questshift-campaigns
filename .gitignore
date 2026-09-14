@@ -1,0 +1,11 @@
+# Python quality
+.venv/
+__pycache__/
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+*.pyc
+
+.githooks/config
+.DS_Store

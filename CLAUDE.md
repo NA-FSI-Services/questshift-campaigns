@@ -13,3 +13,4 @@ Read `AGENTS.md` first (this repo), then the docs-repo map.
 - Regex + `accepted_examples` are the scorer. Keep `forbidden_patterns` for cursed forms.
 - No extra campaigns, TTS copy, or Ollama-specific prompts.
 - Sync engine classpath and gitops copies when this file changes.
+- Quality: `./verify.sh` (yamllint, ruff, pytest-cov). Pre-commit: `./.githooks/install`.

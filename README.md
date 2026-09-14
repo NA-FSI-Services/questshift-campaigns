@@ -23,3 +23,14 @@ Seats (Guardian, Automancer, Cluster Ranger, Artificer) are cosmetic. Any player
 ## Authoring
 
 Keep the whole file under a 60-minute arc: ~10 minutes of framing, ~8–10 minutes per room, ~5 minutes of boss + debrief. Prefer one obvious intended command plus a regex that still accepts reasonable aliases (`oc` vs `kubectl`, `grep -i` vs `grep`).
+
+## Quality gates
+
+Python 3.11+.
+
+```bash
+python3 -m pip install -r requirements-dev.txt
+./verify.sh              # yamllint, ruff, pytest-cov ≥ 80% on tools/
+```
+
+Pre-commit (once per clone): `./.githooks/install`. PRs to `main` run **Quality** / **Lint, ruff, coverage**.
