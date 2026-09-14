@@ -7,8 +7,9 @@ if [[ -f "$CONFIG" ]]; then
     # shellcheck disable=SC1090
     source "$CONFIG"
 fi
+"$ROOT/.githooks/check-secrets" staged
 if [[ "${SKIP_QUESTSHIFT_HOOKS:-}" == "1" ]]; then
-    echo "questshift-campaigns pre-commit: skipped (SKIP_QUESTSHIFT_HOOKS=1)"
+    echo "questshift-campaigns pre-commit: lint skipped (SKIP_QUESTSHIFT_HOOKS=1); secret scan already ran"
     exit 0
 fi
 if ! git diff --cached --name-only --diff-filter=ACMR | grep -Eq '\.(ya?ml|py|toml)$|^campaigns/|^\.githooks/|^verify\.sh$'; then
