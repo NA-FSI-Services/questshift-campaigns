@@ -23,6 +23,7 @@ ROOM_REQUIRED = (
     "hint",
     "success_narrative",
     "canvas_event",
+    "clues",
 )
 SECRET_MARKERS = ("BEGIN PRIVATE KEY", "hf_", "AKIA", "openshift-v4")
 
@@ -67,6 +68,7 @@ def validate_campaign(data: dict[str, Any], *, expected_id: str | None = "devops
     if len(rooms) != 5:
         raise ValueError("v1 campaign must have exactly five rooms")
     orders = []
+    clue_ids: set[str] = set()
     for room in rooms:
         where = f"room {room.get('id', '?')}"
         for key in ROOM_REQUIRED:
@@ -85,8 +87,25 @@ def validate_campaign(data: dict[str, Any], *, expected_id: str | None = "devops
         orders.append(int(room["order"]))
         if "required_seat" in room:
             raise ValueError(f"{where}: seats are cosmetic")
+        _validate_clues(room, where, clue_ids)
     if sorted(orders) != list(range(1, 6)):
         raise ValueError("room order must be 1..5")
+
+
+def _validate_clues(room: dict[str, Any], where: str, seen: set[str]) -> None:
+    clues = room.get("clues") or []
+    if not isinstance(clues, list) or not clues:
+        raise ValueError(f"{where}: missing clues")
+    for clue in clues:
+        if not isinstance(clue, dict):
+            raise ValueError(f"{where}: clue must be a mapping")
+        for key in ("id", "label", "text", "x", "y"):
+            if clue.get(key) in (None, ""):
+                raise ValueError(f"{where}: clue missing {key}")
+        clue_id = str(clue["id"])
+        if clue_id in seen:
+            raise ValueError(f"{where}: duplicate clue id {clue_id}")
+        seen.add(clue_id)
 
 
 def validate_dir(campaigns_dir: Path) -> list[Path]:

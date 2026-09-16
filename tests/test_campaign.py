@@ -136,6 +136,27 @@ def test_rejects_missing_room_field() -> None:
         validate_campaign(data)
 
 
+def test_rejects_missing_clues() -> None:
+    data = load_yaml(CANONICAL)
+    data["rooms"][0]["clues"] = []
+    with pytest.raises(ValueError, match="clues"):
+        validate_campaign(data)
+
+
+def test_rejects_clue_not_mapping() -> None:
+    data = load_yaml(CANONICAL)
+    data["rooms"][0]["clues"] = ["not-a-map"]
+    with pytest.raises(ValueError, match="mapping"):
+        validate_campaign(data)
+
+
+def test_rejects_clue_missing_text() -> None:
+    data = load_yaml(CANONICAL)
+    del data["rooms"][0]["clues"][0]["text"]
+    with pytest.raises(ValueError, match="text"):
+        validate_campaign(data)
+
+
 def test_rejects_wrong_room_order() -> None:
     data = load_yaml(CANONICAL)
     data["rooms"][0]["order"] = 2
