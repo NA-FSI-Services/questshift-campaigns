@@ -175,3 +175,30 @@ def test_allows_other_id_when_expected_none() -> None:
     data = load_yaml(CANONICAL)
     data["metadata"]["id"] = "other-dungeon"
     validate_campaign(data, expected_id=None)
+
+
+def test_broken_shell_teaches_tree_log_and_man() -> None:
+    data = load_yaml(CANONICAL)
+    room = data["rooms"][0]
+    by_id = {clue["id"]: clue for clue in room["clues"]}
+    assert "quest.log" in by_id["shell-tree"]["text"]
+    assert "rune=THORN" in by_id["shell-log"]["text"]
+    assert "GREP(1)" in by_id["shell-man"]["text"]
+    assert "$NF" in by_id["shell-man"]["text"]
+    assert len(room["miss_beats"]) == 2
+
+
+def test_rejects_bad_miss_beat() -> None:
+    data = load_yaml(CANONICAL)
+    data["rooms"][0]["miss_beats"] = [{"pattern": "(", "message": "nope"}]
+    with pytest.raises(ValueError, match="miss_beats"):
+        validate_campaign(data)
+    data["rooms"][0]["miss_beats"] = "not-a-list"
+    with pytest.raises(ValueError, match="miss_beats"):
+        validate_campaign(data)
+    data["rooms"][0]["miss_beats"] = ["not-a-map"]
+    with pytest.raises(ValueError, match="mapping"):
+        validate_campaign(data)
+    data["rooms"][0]["miss_beats"] = [{"pattern": "thorn"}]
+    with pytest.raises(ValueError, match="pattern and message"):
+        validate_campaign(data)

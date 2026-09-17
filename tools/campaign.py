@@ -84,12 +84,32 @@ def validate_campaign(data: dict[str, Any], *, expected_id: str | None = "devops
                 re.compile(str(pattern))
             except re.error as exc:
                 raise ValueError(f"{where}: invalid forbidden_patterns ({exc})") from exc
+        _validate_miss_beats(room, where)
         orders.append(int(room["order"]))
         if "required_seat" in room:
             raise ValueError(f"{where}: seats are cosmetic")
         _validate_clues(room, where, clue_ids)
     if sorted(orders) != list(range(1, 6)):
         raise ValueError("room order must be 1..5")
+
+
+def _validate_miss_beats(room: dict[str, Any], where: str) -> None:
+    beats = room.get("miss_beats") or []
+    if not beats:
+        return
+    if not isinstance(beats, list):
+        raise ValueError(f"{where}: miss_beats must be a list")
+    for beat in beats:
+        if not isinstance(beat, dict):
+            raise ValueError(f"{where}: miss_beat must be a mapping")
+        pattern = beat.get("pattern")
+        message = beat.get("message")
+        if not pattern or not str(message or "").strip():
+            raise ValueError(f"{where}: miss_beat needs pattern and message")
+        try:
+            re.compile(str(pattern))
+        except re.error as exc:
+            raise ValueError(f"{where}: invalid miss_beats pattern ({exc})") from exc
 
 
 def _validate_clues(room: dict[str, Any], where: str, seen: set[str]) -> None:
