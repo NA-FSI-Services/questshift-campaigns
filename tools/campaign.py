@@ -9,6 +9,13 @@ from typing import Any
 import yaml
 
 PUZZLE_TYPES = {"linux", "ansible", "openshift", "java"}
+GUARDIAN_SPRITES = {
+    "guardian_shell",
+    "guardian_playbook",
+    "guardian_pod",
+    "guardian_servlet",
+    "guardian_throne",
+}
 ROOM_REQUIRED = (
     "id",
     "order",
@@ -16,6 +23,7 @@ ROOM_REQUIRED = (
     "mapX",
     "mapY",
     "puzzle_type",
+    "guardian",
     "narrative",
     "prompt",
     "expected_command_pattern",
@@ -69,12 +77,15 @@ def validate_campaign(data: dict[str, Any], *, expected_id: str | None = "devops
         raise ValueError("v1 campaign must have exactly five rooms")
     orders = []
     clue_ids: set[str] = set()
+    guardian_ids: set[str] = set()
+    guardian_sprites: set[str] = set()
     for room in rooms:
         where = f"room {room.get('id', '?')}"
         for key in ROOM_REQUIRED:
             _require(room, key, where)
         if room["puzzle_type"] not in PUZZLE_TYPES:
             raise ValueError(f"{where}: puzzle_type must be one of {sorted(PUZZLE_TYPES)}")
+        _validate_guardian(room, where, guardian_ids, guardian_sprites)
         try:
             re.compile(str(room["expected_command_pattern"]))
         except re.error as exc:
@@ -91,6 +102,29 @@ def validate_campaign(data: dict[str, Any], *, expected_id: str | None = "devops
         _validate_clues(room, where, clue_ids)
     if sorted(orders) != list(range(1, 6)):
         raise ValueError("room order must be 1..5")
+
+
+def _validate_guardian(
+    room: dict[str, Any],
+    where: str,
+    seen_ids: set[str],
+    seen_sprites: set[str],
+) -> None:
+    guardian = room.get("guardian")
+    if not isinstance(guardian, dict):
+        raise ValueError(f"{where}: guardian must be a mapping")
+    for key in ("id", "title", "sprite"):
+        _require(guardian, key, f"{where}.guardian")
+    sprite = str(guardian["sprite"])
+    if sprite not in GUARDIAN_SPRITES:
+        raise ValueError(f"{where}: guardian.sprite must be one of {sorted(GUARDIAN_SPRITES)}")
+    guardian_id = str(guardian["id"])
+    if guardian_id in seen_ids:
+        raise ValueError(f"{where}: duplicate guardian id {guardian_id}")
+    if sprite in seen_sprites:
+        raise ValueError(f"{where}: duplicate guardian sprite {sprite}")
+    seen_ids.add(guardian_id)
+    seen_sprites.add(sprite)
 
 
 def _validate_miss_beats(room: dict[str, Any], where: str) -> None:

@@ -16,4 +16,4 @@ Read this repo's `AGENTS.md`, then campaign authoring.
 - Adventure: https://github.com/NA-FSI-Services/questshift-campaigns/blob/main/campaigns/campaign-devops-dungeon.yaml
   Local: `/Users/dtorresf/Documents/GitHub/na-fsi-services/questshift/questshift-campaigns/campaigns/campaign-devops-dungeon.yaml`
 
-YAML is puzzle source of truth. LLM narrates only. Do not hide win conditions only in prompts. One 60-minute campaign, cosmetic seats. Quality: `./verify.sh`.
+YAML is puzzle source of truth. LLM narrates only. Do not hide win conditions only in prompts. One 60-minute campaign, cosmetic seats. Each room: locked north door with a YAML guardian until solved, always-open south lobby door. Quality: `./verify.sh`.

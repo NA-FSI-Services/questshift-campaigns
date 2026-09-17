@@ -186,6 +186,60 @@ def test_broken_shell_teaches_tree_log_and_man() -> None:
     assert "GREP(1)" in by_id["shell-man"]["text"]
     assert "$NF" in by_id["shell-man"]["text"]
     assert len(room["miss_beats"]) == 2
+    assert room["guardian"]["sprite"] == "guardian_shell"
+    assert "north challenge door" in room["narrative"]
+    assert "south door" in room["narrative"]
+
+
+def test_every_room_has_a_distinct_guardian() -> None:
+    data = load_yaml(CANONICAL)
+    sprites = [room["guardian"]["sprite"] for room in data["rooms"]]
+    assert sprites == [
+        "guardian_shell",
+        "guardian_playbook",
+        "guardian_pod",
+        "guardian_servlet",
+        "guardian_throne",
+    ]
+    for room in data["rooms"]:
+        assert "north challenge door" in room["narrative"]
+        assert "lobby" in room["narrative"]
+        assert "north door unseals" in room["success_narrative"]
+
+
+def test_rejects_missing_guardian() -> None:
+    data = load_yaml(CANONICAL)
+    del data["rooms"][0]["guardian"]
+    with pytest.raises(ValueError, match="guardian"):
+        validate_campaign(data)
+
+
+def test_rejects_unknown_guardian_sprite() -> None:
+    data = load_yaml(CANONICAL)
+    data["rooms"][0]["guardian"]["sprite"] = "dragon"
+    with pytest.raises(ValueError, match="guardian.sprite"):
+        validate_campaign(data)
+
+
+def test_rejects_duplicate_guardian_sprite() -> None:
+    data = load_yaml(CANONICAL)
+    data["rooms"][1]["guardian"]["sprite"] = "guardian_shell"
+    with pytest.raises(ValueError, match="duplicate guardian sprite"):
+        validate_campaign(data)
+
+
+def test_rejects_duplicate_guardian_id() -> None:
+    data = load_yaml(CANONICAL)
+    data["rooms"][1]["guardian"]["id"] = data["rooms"][0]["guardian"]["id"]
+    with pytest.raises(ValueError, match="duplicate guardian id"):
+        validate_campaign(data)
+
+
+def test_rejects_guardian_not_mapping() -> None:
+    data = load_yaml(CANONICAL)
+    data["rooms"][0]["guardian"] = "golem"
+    with pytest.raises(ValueError, match="mapping"):
+        validate_campaign(data)
 
 
 def test_rejects_bad_miss_beat() -> None:
