@@ -11,7 +11,7 @@ Read `AGENTS.md` first (this repo), then the docs-repo map.
 - One campaign: *The Cluster That Forgot Its Name*. Five rooms. Loot runes THORN / ASH / OAK / IRON.
 - Seats are cosmetic; any player may solve any puzzle.
 - Regex + `accepted_examples` are the scorer. Keep `forbidden_patterns` for cursed forms.
-- Each challenge room: locked north door with a YAML `guardian` until solved; always-open south lobby door.
+- Each challenge room: locked north door with a YAML `guardian` until solved; always-open south lobby door. After a pass, the open north door enters the next room.
 - No extra campaigns, TTS copy, or Ollama-specific prompts.
 - Sync engine classpath and gitops copies when this file changes.
 - Quality: `./verify.sh` (yamllint, ruff, pytest-cov). Pre-commit: `./.githooks/install`.

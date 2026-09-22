@@ -143,6 +143,20 @@ def test_rejects_missing_clues() -> None:
         validate_campaign(data)
 
 
+def test_rejects_missing_lobby_clues() -> None:
+    data = load_yaml(CANONICAL)
+    data["story"]["clues"] = []
+    with pytest.raises(ValueError, match="story"):
+        validate_campaign(data)
+
+
+def test_rejects_duplicate_lobby_and_room_clue_id() -> None:
+    data = load_yaml(CANONICAL)
+    data["story"]["clues"][0]["id"] = data["rooms"][0]["clues"][0]["id"]
+    with pytest.raises(ValueError, match="duplicate clue id"):
+        validate_campaign(data)
+
+
 def test_rejects_clue_not_mapping() -> None:
     data = load_yaml(CANONICAL)
     data["rooms"][0]["clues"] = ["not-a-map"]
@@ -175,6 +189,19 @@ def test_allows_other_id_when_expected_none() -> None:
     data = load_yaml(CANONICAL)
     data["metadata"]["id"] = "other-dungeon"
     validate_campaign(data, expected_id=None)
+
+
+def test_lobby_clues_stay_on_the_overworld() -> None:
+    data = load_yaml(CANONICAL)
+    lobby = {clue["id"]: clue for clue in data["story"]["clues"]}
+    assert set(lobby) == {"lobby-hour", "lobby-gates", "lobby-premise"}
+    room_ids = {clue["id"] for room in data["rooms"] for clue in room["clues"]}
+    assert set(lobby).isdisjoint(room_ids)
+    assert "grep -i rune" not in lobby["lobby-hour"]["text"]
+    assert "hosts: dungeon" not in lobby["lobby-gates"]["text"]
+    shell = data["rooms"][0]
+    assert shell["id"] == "room-01-broken-shell"
+    assert {clue["id"] for clue in shell["clues"]} == {"shell-tree", "shell-log", "shell-man"}
 
 
 def test_broken_shell_teaches_tree_log_and_man() -> None:

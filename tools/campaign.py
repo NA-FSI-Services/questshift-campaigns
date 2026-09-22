@@ -77,6 +77,7 @@ def validate_campaign(data: dict[str, Any], *, expected_id: str | None = "devops
         raise ValueError("v1 campaign must have exactly five rooms")
     orders = []
     clue_ids: set[str] = set()
+    _validate_clues(story.get("clues"), "story", clue_ids)
     guardian_ids: set[str] = set()
     guardian_sprites: set[str] = set()
     for room in rooms:
@@ -99,7 +100,7 @@ def validate_campaign(data: dict[str, Any], *, expected_id: str | None = "devops
         orders.append(int(room["order"]))
         if "required_seat" in room:
             raise ValueError(f"{where}: seats are cosmetic")
-        _validate_clues(room, where, clue_ids)
+        _validate_clues(room.get("clues"), where, clue_ids)
     if sorted(orders) != list(range(1, 6)):
         raise ValueError("room order must be 1..5")
 
@@ -146,8 +147,7 @@ def _validate_miss_beats(room: dict[str, Any], where: str) -> None:
             raise ValueError(f"{where}: invalid miss_beats pattern ({exc})") from exc
 
 
-def _validate_clues(room: dict[str, Any], where: str, seen: set[str]) -> None:
-    clues = room.get("clues") or []
+def _validate_clues(clues: Any, where: str, seen: set[str]) -> None:
     if not isinstance(clues, list) or not clues:
         raise ValueError(f"{where}: missing clues")
     for clue in clues:

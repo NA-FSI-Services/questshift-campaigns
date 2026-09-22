@@ -7,6 +7,7 @@ alwaysApply: false
 # Campaign YAML
 
 - Keep `metadata.id: devops-dungeon` and five `order`ed rooms. Seats stay cosmetic.
+- `story.clues` are lobby-map chests (overworld `x` / `y`). Room `clues` stay on that room. Unique `id`s across both.
 - Every room: `puzzle_type`, `expected_command_pattern`, `accepted_examples`, `forbidden_patterns` (when there is a cursed form), `hint`, `narrative`, `success_narrative`, `canvas_event`.
 - Win conditions live in regex + examples, never only in `game_master.system_prompt`.
 - Boss `requires_loot`: `rune-thorn`, `rune-ash`, `rune-oak`, `rune-iron`.
