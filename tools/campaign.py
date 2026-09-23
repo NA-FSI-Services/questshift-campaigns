@@ -16,6 +16,7 @@ GUARDIAN_SPRITES = {
     "guardian_servlet",
     "guardian_throne",
 }
+SHIPPED_IDS = frozenset({"devops-dungeon", "ansible-bastion"})
 ROOM_REQUIRED = (
     "id",
     "order",
@@ -53,13 +54,17 @@ def _require(mapping: dict[str, Any], key: str, where: str) -> Any:
     return mapping[key]
 
 
-def validate_campaign(data: dict[str, Any], *, expected_id: str | None = "devops-dungeon") -> None:
+def validate_campaign(data: dict[str, Any], *, expected_id: str | None = None) -> None:
     if data.get("kind") != "Campaign":
         raise ValueError("kind must be Campaign")
     metadata = data.get("metadata") or {}
     campaign_id = _require(metadata, "id", "metadata")
-    if expected_id and campaign_id != expected_id:
-        raise ValueError(f"v1 ships one campaign id {expected_id}, found {campaign_id}")
+    if expected_id is not None and campaign_id != expected_id:
+        raise ValueError(f"expected campaign id {expected_id}, found {campaign_id}")
+    if expected_id is None and campaign_id not in SHIPPED_IDS:
+        raise ValueError(
+            f"shipped campaign id must be one of {sorted(SHIPPED_IDS)}, found {campaign_id}"
+        )
     duration = metadata.get("durationMinutes")
     if duration != 60:
         raise ValueError("metadata.durationMinutes must be 60")
@@ -74,7 +79,7 @@ def validate_campaign(data: dict[str, Any], *, expected_id: str | None = "devops
     _require(gm, "system_prompt", "game_master")
     rooms = data.get("rooms") or []
     if len(rooms) != 5:
-        raise ValueError("v1 campaign must have exactly five rooms")
+        raise ValueError("campaign must have exactly five rooms")
     orders = []
     clue_ids: set[str] = set()
     _validate_clues(story.get("clues"), "story", clue_ids)
@@ -165,9 +170,18 @@ def _validate_clues(clues: Any, where: str, seen: set[str]) -> None:
 def validate_dir(campaigns_dir: Path) -> list[Path]:
     files = sorted(campaigns_dir.glob("*.yaml")) + sorted(campaigns_dir.glob("*.yml"))
     files = [p for p in files if p.is_file()]
-    if len(files) != 1:
-        raise ValueError(f"v1 ships exactly one campaign YAML, found {len(files)}")
-    validate_campaign(load_yaml(files[0]))
+    if len(files) != 2:
+        raise ValueError(
+            f"shipped campaigns are exactly two YAMLs (devops-dungeon + ansible-bastion), "
+            f"found {len(files)}"
+        )
+    found_ids: set[str] = set()
+    for path in files:
+        data = load_yaml(path)
+        validate_campaign(data)
+        found_ids.add(str(data["metadata"]["id"]))
+    if found_ids != SHIPPED_IDS:
+        raise ValueError(f"expected ids {sorted(SHIPPED_IDS)}, found {sorted(found_ids)}")
     return files
 
 

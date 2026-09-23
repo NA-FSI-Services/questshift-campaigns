@@ -5,10 +5,11 @@ from pathlib import Path
 import pytest
 import yaml
 
-from tools.campaign import load_yaml, main, validate_campaign, validate_dir
+from tools.campaign import SHIPPED_IDS, load_yaml, main, validate_campaign, validate_dir
 
 ROOT = Path(__file__).resolve().parents[1]
 CANONICAL = ROOT / "campaigns" / "campaign-devops-dungeon.yaml"
+ANSIBLE = ROOT / "campaigns" / "campaign-ansible-bastion.yaml"
 
 
 def test_canonical_campaign_passes() -> None:
@@ -16,6 +17,11 @@ def test_canonical_campaign_passes() -> None:
     data = load_yaml(CANONICAL)
     assert data["metadata"]["id"] == "devops-dungeon"
     assert len(data["rooms"]) == 5
+    ansible = load_yaml(ANSIBLE)
+    assert ansible["metadata"]["id"] == "ansible-bastion"
+    assert len(ansible["rooms"]) == 5
+    assert {room["puzzle_type"] for room in ansible["rooms"]} == {"ansible"}
+    assert SHIPPED_IDS == {"devops-dungeon", "ansible-bastion"}
 
 
 def test_main_prints_ok(capsys: pytest.CaptureFixture[str]) -> None:
@@ -31,7 +37,7 @@ def test_rejects_wrong_kind() -> None:
 def test_rejects_wrong_id() -> None:
     data = load_yaml(CANONICAL)
     data["metadata"]["id"] = "other"
-    with pytest.raises(ValueError, match="one campaign"):
+    with pytest.raises(ValueError, match="shipped campaign id"):
         validate_campaign(data)
 
 
@@ -106,12 +112,23 @@ def test_rejects_non_mapping(tmp_path: Path) -> None:
 
 
 def test_validate_dir_wrong_count(tmp_path: Path) -> None:
-    with pytest.raises(ValueError, match="exactly one"):
+    with pytest.raises(ValueError, match="exactly two"):
         validate_dir(tmp_path)
     (tmp_path / "a.yaml").write_text(CANONICAL.read_text(encoding="utf-8"), encoding="utf-8")
-    (tmp_path / "b.yaml").write_text(CANONICAL.read_text(encoding="utf-8"), encoding="utf-8")
-    with pytest.raises(ValueError, match="exactly one"):
+    with pytest.raises(ValueError, match="exactly two"):
         validate_dir(tmp_path)
+    # Two copies of devops-dungeon → wrong id set
+    (tmp_path / "b.yaml").write_text(CANONICAL.read_text(encoding="utf-8"), encoding="utf-8")
+    with pytest.raises(ValueError, match="expected ids"):
+        validate_dir(tmp_path)
+
+
+def test_validate_dir_accepts_shipped_pair() -> None:
+    files = validate_dir(ROOT / "campaigns")
+    assert {p.name for p in files} == {
+        "campaign-devops-dungeon.yaml",
+        "campaign-ansible-bastion.yaml",
+    }
 
 
 def test_yaml_roundtrip_keeps_rooms() -> None:
@@ -185,10 +202,17 @@ def test_rejects_required_seat_flag() -> None:
         validate_campaign(data)
 
 
-def test_allows_other_id_when_expected_none() -> None:
+def test_allows_explicit_expected_id() -> None:
     data = load_yaml(CANONICAL)
-    data["metadata"]["id"] = "other-dungeon"
-    validate_campaign(data, expected_id=None)
+    validate_campaign(data, expected_id="devops-dungeon")
+    ansible = load_yaml(ANSIBLE)
+    validate_campaign(ansible, expected_id="ansible-bastion")
+
+
+def test_rejects_mismatched_expected_id() -> None:
+    data = load_yaml(CANONICAL)
+    with pytest.raises(ValueError, match="expected campaign id"):
+        validate_campaign(data, expected_id="ansible-bastion")
 
 
 def test_lobby_clues_stay_on_the_overworld() -> None:
